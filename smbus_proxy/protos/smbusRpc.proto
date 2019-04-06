@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+service SmbusRcp {
+
+    rpc open                (open_request)           returns (operation_status) {}
+    rpc close               (close_request)           returns (operation_status) {}
+
+    rpc read_byte           (read_byte_request)            returns (read_byte_response) {}
+    rpc write_byte          (write_byte_request)           returns (operation_status) {}
+    rpc read_byte_data      (read_byte_data_request)       returns (read_byte_data_response) {}
+    rpc write_byte_data     (write_byte_data_request)      returns (operation_status) {}
+    rpc read_word_data      (read_word_data_request)       returns (read_word_data_response) {}
+    rpc write_word_data     (write_word_data_request)      returns (operation_status) {}
+    rpc read_i2c_block_data (read_i2c_block_data_request)  returns (read_i2c_block_data_response) {}
+    rpc write_i2c_block_data(write_i2c_block_data_request) returns (operation_status) {}
+}
+
+// Operation status
+message operation_status {
+    int32 code = 1;
+    string exception = 2;
+}
+
+// Open i2c bus.
+message open_request {
+    int32 i2c_bus = 1;
+}
+
+// Close i2c bus.
+message close_request {
+}
+
+// Read a single byte from a device.
+message read_byte_request {
+    int32 i2c_addr = 1;
+}
+message read_byte_response {
+    operation_status status = 1;
+    int32 data = 2;
+}
+
+// Write a single byte to a device.
+message write_byte_request {
+    int32 i2c_addr = 1;
+    int32 value    = 2;
+}
+
+// Read a single byte from a designated register.
+message read_byte_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+}
+message read_byte_data_response {
+    operation_status status = 1;
+    int32 data = 2;
+}
+
+// Write a byte to a given register.
+message write_byte_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+    int32 value    = 3;
+}
+
+// Read a single word (2 bytes) from a given register.
+message read_word_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+}
+message read_word_data_response {
+    operation_status status = 1;
+    int32 data = 2;
+}
+
+// Write a single word (2 bytes) to a given register.
+message write_word_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+    int32 value    = 3;
+}
+
+// Read a block of byte data from a given register.
+message read_i2c_block_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+    int32 length = 3;
+}
+message read_i2c_block_data_response {
+    operation_status status = 1;
+    bytes data = 2;
+    int32 length = 3;
+}
+
+// Write a block of byte data to a given register.
+message write_i2c_block_data_request {
+    int32 i2c_addr = 1;
+    int32 register = 2;
+    bytes data     = 3;
+}
