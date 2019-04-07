@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from smbus_proxy import proxy_server
 import time
 import array
@@ -73,7 +75,7 @@ def test_server():
     This function creates and runs a server
     :return:
     """
-    server = proxy_server.ProxyServer('[::]:50051', SMBus_test)
+    server = proxy_server.ProxyServer('[::]:50051', SMBus_test, 5)
     server.serve()
 
     try:
