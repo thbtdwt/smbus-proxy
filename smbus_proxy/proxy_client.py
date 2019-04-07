@@ -40,7 +40,7 @@ class ProxyClient:
             if status.code:
                 raise Exception(status.exception)
 
-    def read_byte(self, i2c_addr):
+    def read_byte(self, i2c_addr: int):
         """
         Read byte from a i2c device.
         :param i2c_addr: i2c device address.
@@ -52,7 +52,7 @@ class ProxyClient:
         else:
             raise Exception(response.status.exception)
 
-    def write_byte(self, i2c_addr, value):
+    def write_byte(self, i2c_addr: int, value: int):
         """
         Write byte to an i2c device.
         :param i2c_addr: i2c device address.
@@ -64,7 +64,7 @@ class ProxyClient:
         if status.code:
             raise Exception(status.exception)
 
-    def read_byte_data(self, i2c_addr, register):
+    def read_byte_data(self, i2c_addr: int, register: int):
         """
         Read byte from an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -77,7 +77,7 @@ class ProxyClient:
         else:
             raise Exception(response.status.exception)
 
-    def write_byte_data(self, i2c_addr, register, value):
+    def write_byte_data(self, i2c_addr: int, register: int, value: int):
         """
         Read byte to an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -90,7 +90,7 @@ class ProxyClient:
         if status.code:
             raise Exception(status.exception)
 
-    def read_word_data(self, i2c_addr, register):
+    def read_word_data(self, i2c_addr: int, register: int):
         """
         Read word to an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -103,7 +103,7 @@ class ProxyClient:
         else:
             raise Exception(response.status.exception)
 
-    def write_word_data(self, i2c_addr, register, value):
+    def write_word_data(self, i2c_addr: int, register: int, value: int):
         """
         Write word to an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -116,7 +116,7 @@ class ProxyClient:
         if status.code:
             raise Exception(status.exception)
 
-    def read_i2c_block_data(self, i2c_addr, register):
+    def read_i2c_block_data(self, i2c_addr: int, register: int):
         """
         Read i2c block from an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -130,15 +130,15 @@ class ProxyClient:
         else:
             raise Exception(response.status.exception)
 
-    def write_i2c_block_data(self, i2c_addr, register, value):
+    def write_i2c_block_data(self, i2c_addr: int, register: int, data: bytes):
         """
         Write i2c block to an address of i2c device.
         :param i2c_addr: i2c device address.
         :param register: register address.
-        :param value: bytes value
+        :param data: bytes data
         :return:
         """
         status = self.stub.write_i2c_block_data(smbusRpc_pb2.write_i2c_block_data_request(i2c_addr=i2c_addr,
-                                                                                         register=register, data=value))
+                                                                                         register=register, data=data))
         if status.code:
             raise Exception(status.exception)
