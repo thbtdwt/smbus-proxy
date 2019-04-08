@@ -21,6 +21,7 @@ class ProxyClient:
         self.channel = None
         self.stub = None
         try:
+
             self.channel = grpc.insecure_channel(server_address)
             grpc.channel_ready_future(self.channel).result(timeout=5)
             self.stub = smbusRpc_pb2_grpc.SmbusRcpStub(self.channel)
@@ -126,11 +127,11 @@ class ProxyClient:
         response = self.stub.read_i2c_block_data(smbusRpc_pb2.read_i2c_block_data_request(i2c_addr=i2c_addr,
                                                                                           register=register))
         if response.status.code == 0:
-            return response.data
+            return list(response.data)
         else:
             raise Exception(response.status.exception)
 
-    def write_i2c_block_data(self, i2c_addr: int, register: int, data: bytes):
+    def write_i2c_block_data(self, i2c_addr: int, register: int, data: [int]):
         """
         Write i2c block to an address of i2c device.
         :param i2c_addr: i2c device address.
@@ -139,6 +140,7 @@ class ProxyClient:
         :return:
         """
         status = self.stub.write_i2c_block_data(smbusRpc_pb2.write_i2c_block_data_request(i2c_addr=i2c_addr,
-                                                                                         register=register, data=data))
+                                                                                          register=register,
+                                                                                          data=bytes(data)))
         if status.code:
             raise Exception(status.exception)

@@ -29,8 +29,8 @@ class test_client(unittest.TestCase):
 
     def test_write_read_i2c_block_data(self):
         client = proxy_client.ProxyClient('localhost:50051', 1)
-        client.write_i2c_block_data(0x50, 0, bytes([0x10, 0x45, 0x17]))
-        self.assertEqual(client.read_i2c_block_data(0x50, 0), bytes([0x10, 0x45, 0x17]))
+        client.write_i2c_block_data(0x50, 0, [0x10, 0x45, 0x17])
+        self.assertEqual(client.read_i2c_block_data(0x50, 0), [0x10, 0x45, 0x17])
 
     def test_error_instantiation(self):
         with self.assertRaises(Exception):
