@@ -2,7 +2,6 @@
 
 
 import grpc
-
 from smbus_proxy import smbusRpc_pb2
 from smbus_proxy import smbusRpc_pb2_grpc
 
@@ -20,14 +19,20 @@ class ProxyClient:
         self.i2c_bus = i2c_bus
         self.channel = None
         self.stub = None
+        self.id = None
         try:
-
             self.channel = grpc.insecure_channel(server_address)
             grpc.channel_ready_future(self.channel).result(timeout=5)
             self.stub = smbusRpc_pb2_grpc.SmbusRcpStub(self.channel)
         except Exception as e:
             raise Exception('Connect to %s failed: %s'%(server_address,str(e)))
-        status = self.stub.open(smbusRpc_pb2.open_request(i2c_bus=self.i2c_bus))
+        status, call = self.stub.open.with_call(smbusRpc_pb2.open_request(i2c_bus=self.i2c_bus))
+
+        for key, value in call.trailing_metadata():
+            if key == 'client_id':
+                self.id = value
+                break
+
         if status.code:
             raise Exception(status.exception)
 
@@ -36,8 +41,8 @@ class ProxyClient:
         Destructor
         :return:
         """
-        if self.stub:
-            status = self.stub.close(smbusRpc_pb2.close_request())
+        if self.id and self.stub:
+            status = self.stub.close(smbusRpc_pb2.close_request(), metadata=(('client_id', self.id),))
             if status.code:
                 raise Exception(status.exception)
 
@@ -47,7 +52,8 @@ class ProxyClient:
         :param i2c_addr: i2c device address.
         :return: int32
         """
-        response = self.stub.read_byte(smbusRpc_pb2.read_byte_request(i2c_addr=i2c_addr))
+        response = self.stub.read_byte(smbusRpc_pb2.read_byte_request(i2c_addr=i2c_addr),
+                                       metadata=(('client_id', self.id),))
         if response.status.code == 0:
             return response.data
         else:
@@ -60,7 +66,8 @@ class ProxyClient:
         :param value: byte value.
         :return:
         """
-        status = self.stub.write_byte(smbusRpc_pb2.write_byte_request(i2c_addr=i2c_addr, value=value))
+        status = self.stub.write_byte(smbusRpc_pb2.write_byte_request(i2c_addr=i2c_addr, value=value),
+                                      metadata=(('client_id', self.id),))
         print(status)
         if status.code:
             raise Exception(status.exception)
@@ -72,7 +79,8 @@ class ProxyClient:
         :param register: register address.
         :return: int32
         """
-        response = self.stub.read_byte_data(smbusRpc_pb2.read_byte_data_request(i2c_addr=i2c_addr, register=register))
+        response = self.stub.read_byte_data(smbusRpc_pb2.read_byte_data_request(i2c_addr=i2c_addr, register=register),
+                                            metadata=(('client_id', self.id),))
         if response.status.code == 0:
             return response.data
         else:
@@ -87,7 +95,8 @@ class ProxyClient:
         :return:
         """
         status = self.stub.write_byte_data(smbusRpc_pb2.write_byte_data_request(i2c_addr=i2c_addr, register=register,
-                                                                           value=value))
+                                                                                value=value),
+                                           metadata=(('client_id', self.id),))
         if status.code:
             raise Exception(status.exception)
 
@@ -98,7 +107,8 @@ class ProxyClient:
         :param register: register address.
         :return: int32
         """
-        response = self.stub.read_word_data(smbusRpc_pb2.read_word_data_request(i2c_addr=i2c_addr, register=register))
+        response = self.stub.read_word_data(smbusRpc_pb2.read_word_data_request(i2c_addr=i2c_addr, register=register),
+                                            metadata=(('client_id', self.id),))
         if response.status.code == 0:
             return response.data
         else:
@@ -113,7 +123,8 @@ class ProxyClient:
         :return:
         """
         status = self.stub.write_word_data(smbusRpc_pb2.write_word_data_request(i2c_addr=i2c_addr, register=register,
-                                                                           value=value))
+                                                                           value=value),
+                                           metadata=(('client_id', self.id),))
         if status.code:
             raise Exception(status.exception)
 
@@ -125,7 +136,8 @@ class ProxyClient:
         :return: bytes
         """
         response = self.stub.read_i2c_block_data(smbusRpc_pb2.read_i2c_block_data_request(i2c_addr=i2c_addr,
-                                                                                          register=register))
+                                                                                          register=register),
+                                                 metadata=(('client_id', self.id),))
         if response.status.code == 0:
             return list(response.data)
         else:
@@ -141,6 +153,7 @@ class ProxyClient:
         """
         status = self.stub.write_i2c_block_data(smbusRpc_pb2.write_i2c_block_data_request(i2c_addr=i2c_addr,
                                                                                           register=register,
-                                                                                          data=bytes(data)))
+                                                                                          data=bytes(data)),
+                                                metadata=(('client_id', self.id),))
         if status.code:
             raise Exception(status.exception)

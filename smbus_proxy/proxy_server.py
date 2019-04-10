@@ -4,6 +4,8 @@ from concurrent import futures
 import grpc
 from smbus_proxy import smbusRpc_pb2
 from smbus_proxy import smbusRpc_pb2_grpc
+import time
+import hashlib
 
 
 class BusContext(object):
@@ -45,17 +47,44 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         """
         i2c_bus = request.i2c_bus
         response = smbusRpc_pb2.operation_status(code=0, exception='')
+        client_id = self._generate_id(context)
+
         try:
             if i2c_bus in self.opened_busses:
-                self.clients[context.peer()] = self.opened_busses[i2c_bus]
+                self.clients[client_id] = self.opened_busses[i2c_bus]
                 self.opened_busses[i2c_bus].ref_count += 1
             else:
                 self.opened_busses[i2c_bus] = BusContext(i2c_bus, self.smbus_cls(i2c_bus))
-                self.clients[context.peer()] = self.opened_busses[i2c_bus]
+                self.clients[client_id] = self.opened_busses[i2c_bus]
+            context.set_trailing_metadata((('client_id', client_id),))
         except Exception as e:
             response.code = 1
             response.exception = 'proxy server: ' + str(e)
         return response
+
+    def _generate_id(self, context):
+        """
+        Generate client if from context
+        :param context: grpc context
+        :return: client id
+        """
+        tmp = str(int(round(time.time() * 1000)))
+        tmp += context.peer()
+        m = hashlib.md5()
+        m.update(tmp.encode('utf-8'))
+        return str(m.hexdigest())
+
+    def _get_client_id(self, context):
+        """
+        Get client id from context
+        :param context: grpc context
+        :return: client id
+        """
+        for key, value in context.invocation_metadata():
+            if key == 'client_id':
+                return value
+        raise Exception('client id not found')
+
 
     def close(self, request, context):
         """
@@ -66,8 +95,9 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         """
         response = smbusRpc_pb2.operation_status(code=0, exception='')
         try:
-            bus_context = self.clients[context.peer()]
-            del self.clients[context.peer()]
+            client_id = self._get_client_id(context)
+            bus_context = self.clients[client_id]
+            del self.clients[client_id]
             bus_context.ref_count -= 1
 
             if bus_context.ref_count == 0:
@@ -90,7 +120,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_addr = request.i2c_addr
         i2c_data = None
         try:
-            i2c_data = self.clients[context.peer()].smbus.read_byte(i2c_addr)
+            client_id = self._get_client_id(context)
+            i2c_data = self.clients[client_id].smbus.read_byte(i2c_addr)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -107,7 +138,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_addr = request.i2c_addr
         value = request.value
         try:
-            self.clients[context.peer()].smbus.write_byte(i2c_addr, value)
+            client_id = self._get_client_id(context)
+            self.clients[client_id].smbus.write_byte(i2c_addr, value)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -125,7 +157,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_data = None
         try:
-            i2c_data = self.clients[context.peer()].smbus.read_byte_data(i2c_addr, i2c_register)
+            client_id = self._get_client_id(context)
+            i2c_data = self.clients[client_id].smbus.read_byte_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -143,7 +176,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_value = request.value
         try:
-            self.clients[context.peer()].smbus.write_byte_data(i2c_addr, i2c_register, i2c_value)
+            client_id = self._get_client_id(context)
+            self.clients[client_id].smbus.write_byte_data(i2c_addr, i2c_register, i2c_value)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -161,7 +195,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_data = None
         try:
-            i2c_data = self.clients[context.peer()].smbus.read_word_data(i2c_addr, i2c_register)
+            client_id = self._get_client_id(context)
+            i2c_data = self.clients[client_id].smbus.read_word_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -179,7 +214,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_value = request.value
         try:
-            self.clients[context.peer()].smbus.write_word_data(i2c_addr, i2c_register, i2c_value)
+            client_id = self._get_client_id(context)
+            self.clients[client_id].smbus.write_word_data(i2c_addr, i2c_register, i2c_value)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -197,7 +233,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_data = None
         try:
-            i2c_data = self.clients[context.peer()].smbus.read_i2c_block_data(i2c_addr, i2c_register)
+            client_id = self._get_client_id(context)
+            i2c_data = self.clients[client_id].smbus.read_i2c_block_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
@@ -215,7 +252,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_register = request.register
         i2c_data = request.data
         try:
-            self.clients[context.peer()].smbus.write_i2c_block_data(i2c_addr, i2c_register, list(i2c_data))
+            client_id = self._get_client_id(context)
+            self.clients[client_id].smbus.write_i2c_block_data(i2c_addr, i2c_register, list(i2c_data))
         except Exception as e:
             status_response.code = 1
             status_response.exception = 'proxy server: ' + str(e)
