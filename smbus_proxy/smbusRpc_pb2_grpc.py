@@ -64,6 +64,11 @@ class SmbusRcpStub(object):
         request_serializer=smbusRpc__pb2.write_i2c_block_data_request.SerializeToString,
         response_deserializer=smbusRpc__pb2.operation_status.FromString,
         )
+    self.ping = channel.unary_unary(
+        '/SmbusRcp/ping',
+        request_serializer=smbusRpc__pb2.keep_alive.SerializeToString,
+        response_deserializer=smbusRpc__pb2.keep_alive.FromString,
+        )
 
 
 class SmbusRcpServicer(object):
@@ -140,6 +145,13 @@ class SmbusRcpServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def ping(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_SmbusRcpServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -192,6 +204,11 @@ def add_SmbusRcpServicer_to_server(servicer, server):
           servicer.write_i2c_block_data,
           request_deserializer=smbusRpc__pb2.write_i2c_block_data_request.FromString,
           response_serializer=smbusRpc__pb2.operation_status.SerializeToString,
+      ),
+      'ping': grpc.unary_unary_rpc_method_handler(
+          servicer.ping,
+          request_deserializer=smbusRpc__pb2.keep_alive.FromString,
+          response_serializer=smbusRpc__pb2.keep_alive.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='smbusRpc.proto',
   package='',
   syntax='proto3',
-  serialized_pb=_b('\n\x0esmbusRpc.proto\"3\n\x10operation_status\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x11\n\texception\x18\x02 \x01(\t\"\x1f\n\x0copen_request\x12\x0f\n\x07i2c_bus\x18\x01 \x01(\x05\"\x0f\n\rclose_request\"%\n\x11read_byte_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\"E\n\x12read_byte_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"5\n\x12write_byte_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05\"<\n\x16read_byte_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\"J\n\x17read_byte_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"L\n\x17write_byte_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\r\n\x05value\x18\x03 \x01(\x05\"<\n\x16read_word_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\"J\n\x17read_word_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"L\n\x17write_word_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\r\n\x05value\x18\x03 \x01(\x05\"Q\n\x1bread_i2c_block_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\x0e\n\x06length\x18\x03 \x01(\x05\"_\n\x1cread_i2c_block_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x12\x0e\n\x06length\x18\x03 \x01(\x05\"P\n\x1cwrite_i2c_block_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\x32\x88\x05\n\x08SmbusRcp\x12*\n\x04open\x12\r.open_request\x1a\x11.operation_status\"\x00\x12,\n\x05\x63lose\x12\x0e.close_request\x1a\x11.operation_status\"\x00\x12\x36\n\tread_byte\x12\x12.read_byte_request\x1a\x13.read_byte_response\"\x00\x12\x36\n\nwrite_byte\x12\x13.write_byte_request\x1a\x11.operation_status\"\x00\x12\x45\n\x0eread_byte_data\x12\x17.read_byte_data_request\x1a\x18.read_byte_data_response\"\x00\x12@\n\x0fwrite_byte_data\x12\x18.write_byte_data_request\x1a\x11.operation_status\"\x00\x12\x45\n\x0eread_word_data\x12\x17.read_word_data_request\x1a\x18.read_word_data_response\"\x00\x12@\n\x0fwrite_word_data\x12\x18.write_word_data_request\x1a\x11.operation_status\"\x00\x12T\n\x13read_i2c_block_data\x12\x1c.read_i2c_block_data_request\x1a\x1d.read_i2c_block_data_response\"\x00\x12J\n\x14write_i2c_block_data\x12\x1d.write_i2c_block_data_request\x1a\x11.operation_status\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0esmbusRpc.proto\"3\n\x10operation_status\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\x11\n\texception\x18\x02 \x01(\t\"\x1f\n\x0copen_request\x12\x0f\n\x07i2c_bus\x18\x01 \x01(\x05\"\x0f\n\rclose_request\"%\n\x11read_byte_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\"E\n\x12read_byte_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"5\n\x12write_byte_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\r\n\x05value\x18\x02 \x01(\x05\"<\n\x16read_byte_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\"J\n\x17read_byte_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"L\n\x17write_byte_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\r\n\x05value\x18\x03 \x01(\x05\"<\n\x16read_word_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\"J\n\x17read_word_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x05\"L\n\x17write_word_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\r\n\x05value\x18\x03 \x01(\x05\"Q\n\x1bread_i2c_block_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\x0e\n\x06length\x18\x03 \x01(\x05\"_\n\x1cread_i2c_block_data_response\x12!\n\x06status\x18\x01 \x01(\x0b\x32\x11.operation_status\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\x12\x0e\n\x06length\x18\x03 \x01(\x05\"P\n\x1cwrite_i2c_block_data_request\x12\x10\n\x08i2c_addr\x18\x01 \x01(\x05\x12\x10\n\x08register\x18\x02 \x01(\x05\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"\x1a\n\nkeep_alive\x12\x0c\n\x04info\x18\x01 \x01(\t2\xac\x05\n\x08SmbusRcp\x12*\n\x04open\x12\r.open_request\x1a\x11.operation_status\"\x00\x12,\n\x05\x63lose\x12\x0e.close_request\x1a\x11.operation_status\"\x00\x12\x36\n\tread_byte\x12\x12.read_byte_request\x1a\x13.read_byte_response\"\x00\x12\x36\n\nwrite_byte\x12\x13.write_byte_request\x1a\x11.operation_status\"\x00\x12\x45\n\x0eread_byte_data\x12\x17.read_byte_data_request\x1a\x18.read_byte_data_response\"\x00\x12@\n\x0fwrite_byte_data\x12\x18.write_byte_data_request\x1a\x11.operation_status\"\x00\x12\x45\n\x0eread_word_data\x12\x17.read_word_data_request\x1a\x18.read_word_data_response\"\x00\x12@\n\x0fwrite_word_data\x12\x18.write_word_data_request\x1a\x11.operation_status\"\x00\x12T\n\x13read_i2c_block_data\x12\x1c.read_i2c_block_data_request\x1a\x1d.read_i2c_block_data_response\"\x00\x12J\n\x14write_i2c_block_data\x12\x1d.write_i2c_block_data_request\x1a\x11.operation_status\"\x00\x12\"\n\x04ping\x12\x0b.keep_alive\x1a\x0b.keep_alive\"\x00\x62\x06proto3')
 )
 
 
@@ -601,6 +601,37 @@ _WRITE_I2C_BLOCK_DATA_REQUEST = _descriptor.Descriptor(
   serialized_end=978,
 )
 
+
+_KEEP_ALIVE = _descriptor.Descriptor(
+  name='keep_alive',
+  full_name='keep_alive',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='info', full_name='keep_alive.info', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=980,
+  serialized_end=1006,
+)
+
 _READ_BYTE_RESPONSE.fields_by_name['status'].message_type = _OPERATION_STATUS
 _READ_BYTE_DATA_RESPONSE.fields_by_name['status'].message_type = _OPERATION_STATUS
 _READ_WORD_DATA_RESPONSE.fields_by_name['status'].message_type = _OPERATION_STATUS
@@ -620,6 +651,7 @@ DESCRIPTOR.message_types_by_name['write_word_data_request'] = _WRITE_WORD_DATA_R
 DESCRIPTOR.message_types_by_name['read_i2c_block_data_request'] = _READ_I2C_BLOCK_DATA_REQUEST
 DESCRIPTOR.message_types_by_name['read_i2c_block_data_response'] = _READ_I2C_BLOCK_DATA_RESPONSE
 DESCRIPTOR.message_types_by_name['write_i2c_block_data_request'] = _WRITE_I2C_BLOCK_DATA_REQUEST
+DESCRIPTOR.message_types_by_name['keep_alive'] = _KEEP_ALIVE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 operation_status = _reflection.GeneratedProtocolMessageType('operation_status', (_message.Message,), dict(
@@ -727,6 +759,13 @@ write_i2c_block_data_request = _reflection.GeneratedProtocolMessageType('write_i
   ))
 _sym_db.RegisterMessage(write_i2c_block_data_request)
 
+keep_alive = _reflection.GeneratedProtocolMessageType('keep_alive', (_message.Message,), dict(
+  DESCRIPTOR = _KEEP_ALIVE,
+  __module__ = 'smbusRpc_pb2'
+  # @@protoc_insertion_point(class_scope:keep_alive)
+  ))
+_sym_db.RegisterMessage(keep_alive)
+
 
 
 _SMBUSRCP = _descriptor.ServiceDescriptor(
@@ -735,8 +774,8 @@ _SMBUSRCP = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=981,
-  serialized_end=1629,
+  serialized_start=1009,
+  serialized_end=1693,
   methods=[
   _descriptor.MethodDescriptor(
     name='open',
@@ -826,6 +865,15 @@ _SMBUSRCP = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_WRITE_I2C_BLOCK_DATA_REQUEST,
     output_type=_OPERATION_STATUS,
+    options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='ping',
+    full_name='SmbusRcp.ping',
+    index=10,
+    containing_service=None,
+    input_type=_KEEP_ALIVE,
+    output_type=_KEEP_ALIVE,
     options=None,
   ),
 ])

@@ -4,7 +4,7 @@
 import grpc
 from smbus_proxy import smbusRpc_pb2
 from smbus_proxy import smbusRpc_pb2_grpc
-
+from smbus_proxy import loop_thread
 
 class ProxyClient:
     """
@@ -20,6 +20,7 @@ class ProxyClient:
         self.channel = None
         self.stub = None
         self.id = None
+        self.keep_alive_thread = None
         try:
             self.channel = grpc.insecure_channel(server_address)
             grpc.channel_ready_future(self.channel).result(timeout=5)
@@ -33,18 +34,36 @@ class ProxyClient:
                 self.id = value
                 break
 
+        self.keep_alive_thread = loop_thread.LoopThread(target=self._keep_alive_handler, period=1)
+        self.keep_alive_thread.setDaemon(True)
+        self.keep_alive_thread.start()
+
         if status.code:
             raise Exception(status.exception)
 
-    def __del__(self):
+    def _keep_alive_handler(self):
         """
-        Destructor
+        Send ping regularly
         :return:
         """
+        try:
+            self.stub.ping(smbusRpc_pb2.keep_alive(info='request'), metadata=(('client_id', self.id),))
+        except Exception as e:
+            print(e)
+
+    def close(self):
+        """
+        Close communication with server
+        :return:
+        """
+        if self.keep_alive_thread:
+            self.keep_alive_thread.cancel()
+
         if self.id and self.stub:
             status = self.stub.close(smbusRpc_pb2.close_request(), metadata=(('client_id', self.id),))
             if status.code:
                 raise Exception(status.exception)
+
 
     def read_byte(self, i2c_addr: int):
         """

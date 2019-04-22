@@ -13,6 +13,8 @@ service SmbusRcp {
     rpc write_word_data     (write_word_data_request)      returns (operation_status) {}
     rpc read_i2c_block_data (read_i2c_block_data_request)  returns (read_i2c_block_data_response) {}
     rpc write_i2c_block_data(write_i2c_block_data_request) returns (operation_status) {}
+
+    rpc ping                (keep_alive)                   returns (keep_alive) {}
 }
 
 // Operation status
@@ -96,4 +98,8 @@ message write_i2c_block_data_request {
     int32 i2c_addr = 1;
     int32 register = 2;
     bytes data     = 3;
+}
+
+message keep_alive {
+    string info = 1;
 }
