@@ -5,12 +5,13 @@ import grpc
 from smbus_proxy import smbusRpc_pb2
 from smbus_proxy import smbusRpc_pb2_grpc
 from smbus_proxy import loop_thread
+import logging
 
 class ProxyClient:
     """
     As SMBus, this claas provides function to access to an i2c device.
     """
-    def __init__(self, server_address, i2c_bus):
+    def __init__(self, server_address, i2c_bus, log_level=logging.INFO):
         """
         Constructor
         :param server_address: ip + port of the server
@@ -21,6 +22,7 @@ class ProxyClient:
         self.stub = None
         self.id = None
         self.keep_alive_thread = None
+        self.logger = self._configure_logger(log_level)
         try:
             self.channel = grpc.insecure_channel(server_address)
             grpc.channel_ready_future(self.channel).result(timeout=5)
@@ -33,6 +35,7 @@ class ProxyClient:
             if key == 'client_id':
                 self.id = value
                 break
+        self.logger.debug('Get id %s' % self.id)
 
         self.keep_alive_thread = loop_thread.LoopThread(target=self._keep_alive_handler, period=1)
         self.keep_alive_thread.setDaemon(True)
@@ -40,6 +43,8 @@ class ProxyClient:
 
         if status.code:
             raise Exception(status.exception)
+
+        self.logger.debug('Client ready')
 
     def _keep_alive_handler(self):
         """
@@ -50,6 +55,22 @@ class ProxyClient:
             self.stub.ping(smbusRpc_pb2.keep_alive(info='request'), metadata=(('client_id', self.id),))
         except Exception as e:
             print(e)
+
+    @staticmethod
+    def _configure_logger(level):
+        """
+        Configure the logger format
+        :param self:
+        :param level: logging level, INFO, DEBUG etc
+        :return: logger
+        """
+        logger = logging.getLogger('ProxyClient')
+        logger.setLevel(level)
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(level)
+        stream_handler.setFormatter(logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s'))
+        logger.addHandler(stream_handler)
+        return logger
 
     def close(self):
         """
