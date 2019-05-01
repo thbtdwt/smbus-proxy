@@ -8,6 +8,8 @@ from smbus_proxy import loop_thread
 import time
 import datetime
 import hashlib
+import logging
+from logging.handlers import RotatingFileHandler
 
 
 class Client(object):
@@ -43,11 +45,12 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
     """
     This class converts rpc messages to i2c operations
     """
-    def __init__(self, smbus_cls):
+    def __init__(self, smbus_cls, trace_level=logging.INFO):
         """
         Constructor
         :param smbus_cls: Class used to manage i2c bus
         """
+        self.logger = self._configure_logger(trace_level)
         self.smbus_cls = smbus_cls
         self.opened_busses = dict()
         self.clients = dict()
@@ -56,6 +59,16 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         self.keep_alive_thread.setDaemon(True)
         self.keep_alive_thread.start()
 
+        self.logger.info('Server started')
+
+    def _configure_logger(self, level):
+        logger = logging.getLogger('SmbusRcpServer')
+        logger.setLevel(level)
+        stream_handler = logging.StreamHandler()
+        stream_handler.setLevel(level)
+        stream_handler.setFormatter(logging.Formatter('%(asctime)s :: %(levelname)s :: %(message)s'))
+        logger.addHandler(stream_handler)
+        return logger
 
     def _keep_alive_handler(self):
         """
@@ -70,6 +83,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
                  to_be_deleted.append(key)
 
         for i in to_be_deleted:
+            self.logger.info('No activity from client %s since 5 sec delete it' % i)
             del self.clients[i]
 
 
@@ -84,6 +98,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_bus = request.i2c_bus
         response = smbusRpc_pb2.operation_status(code=0, exception='')
         client_id = self._generate_id(context)
+        self.logger.info('New client(%s) requests bus %d' % (client_id, i2c_bus))
 
         try:
             if i2c_bus in self.opened_busses:
@@ -134,6 +149,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         try:
             client_id = self._get_client_id(context)
             bus_context = self.clients[client_id].bus_context
+            self.logger.info('Client(%s) release bus %d' % (client_id, bus_context.i2c_bus))
             del self.clients[client_id]
             bus_context.ref_count -= 1
 
@@ -158,6 +174,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_data = None
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) read_byte at 0x%x' % (client_id, i2c_addr))
             i2c_data = self.clients[client_id].bus_context.smbus.read_byte(i2c_addr)
         except Exception as e:
             status_response.code = 1
@@ -176,6 +193,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         value = request.value
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) write_byte (0x%x) at 0x%x' % (client_id, value, i2c_addr))
             self.clients[client_id].bus_context.smbus.write_byte(i2c_addr, value)
         except Exception as e:
             status_response.code = 1
@@ -195,6 +213,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_data = None
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) read_byte_data at 0x%x register 0x%x' % (client_id, i2c_addr, i2c_register))
             i2c_data = self.clients[client_id].bus_context.smbus.read_byte_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
@@ -214,6 +233,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_value = request.value
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) write_byte (0x%x) at 0x%x register 0x%x' % (client_id, i2c_value, i2c_addr,
+                                                                                     i2c_register))
             self.clients[client_id].bus_context.smbus.write_byte_data(i2c_addr, i2c_register, i2c_value)
         except Exception as e:
             status_response.code = 1
@@ -233,6 +254,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_data = None
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) read_word_data at 0x%x register 0x%x' % (client_id,  i2c_addr, i2c_register))
             i2c_data = self.clients[client_id].bus_context.smbus.read_word_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
@@ -252,6 +274,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_value = request.value
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) write_word_data (0x%x) at 0x%x register 0x%x' % (client_id, i2c_value, i2c_addr,
+                                                                                          i2c_register))
             self.clients[client_id].bus_context.smbus.write_word_data(i2c_addr, i2c_register, i2c_value)
         except Exception as e:
             status_response.code = 1
@@ -271,6 +295,8 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_data = None
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) read_i2c_block_data at 0x%x register 0x%x' % (client_id, i2c_addr,
+                                                                                              i2c_register))
             i2c_data = self.clients[client_id].bus_context.smbus.read_i2c_block_data(i2c_addr, i2c_register)
         except Exception as e:
             status_response.code = 1
@@ -290,6 +316,7 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         i2c_data = request.data
         try:
             client_id = self._get_client_id(context)
+            self.logger.info('Client(%s) write_i2c_block_data at 0x%x register 0x%x' % (client_id, i2c_addr, i2c_register))
             self.clients[client_id].bus_context.smbus.write_i2c_block_data(i2c_addr, i2c_register, list(i2c_data))
         except Exception as e:
             status_response.code = 1
@@ -305,17 +332,15 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         """
         client_id = self._get_client_id(context)
         self.clients[client_id].update()
-        #print('ping from %s' % self._get_client_id(context))
+        self.logger.debug('Ping from client(%s)' % client_id)
         return smbusRpc_pb2.keep_alive(info='keep alive end')
-
-
 
 
 class ProxyServer:
     """
     This class creates a server to manage i2c bus.
     """
-    def __init__(self, ip, smbus_cls, max_workers):
+    def __init__(self, ip, smbus_cls, max_workers=4, trace_level=logging.INFO):
         """
         Construtor
         :param ip: Ip address and port to listen
@@ -324,7 +349,7 @@ class ProxyServer:
         self.smbus_cls = smbus_cls
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
         smbusRpc_pb2_grpc.add_SmbusRcpServicer_to_server(
-            SmbusRcpServicer(self.smbus_cls), self.grpc_server)
+            SmbusRcpServicer(self.smbus_cls, trace_level), self.grpc_server)
         self.grpc_server.add_insecure_port(ip)
 
     def serve(self):
