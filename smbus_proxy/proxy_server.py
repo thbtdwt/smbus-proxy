@@ -43,12 +43,12 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
     """
     This class converts rpc messages to i2c operations
     """
-    def __init__(self, smbus_cls, trace_level=logging.INFO):
+    def __init__(self, smbus_cls, log_level=logging.INFO):
         """
         Constructor
         :param smbus_cls: Class used to manage i2c bus
         """
-        self.logger = self._configure_logger(trace_level)
+        self.logger = self._configure_logger(log_level)
         self.smbus_cls = smbus_cls
         self.opened_busses = dict()
         self.clients = dict()
@@ -335,7 +335,7 @@ class ProxyServer:
     """
     This class creates a server to manage i2c bus.
     """
-    def __init__(self, ip, smbus_cls, max_workers=4, trace_level=logging.INFO):
+    def __init__(self, ip, smbus_cls, max_workers=4, log_level=logging.INFO):
         """
         Construtor
         :param ip: Ip address and port to listen
@@ -344,7 +344,7 @@ class ProxyServer:
         self.smbus_cls = smbus_cls
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
         smbusRpc_pb2_grpc.add_SmbusRcpServicer_to_server(
-            SmbusRcpServicer(self.smbus_cls, trace_level), self.grpc_server)
+            SmbusRcpServicer(self.smbus_cls, log_level), self.grpc_server)
         self.grpc_server.add_insecure_port(ip)
 
     def serve(self):
