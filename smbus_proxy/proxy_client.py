@@ -25,7 +25,6 @@ class ProxyClient:
         self.logger = self._configure_logger(log_level)
         try:
             self.channel = grpc.insecure_channel(server_address)
-            grpc.channel_ready_future(self.channel).result(timeout=5)
             self.stub = smbusRpc_pb2_grpc.SmbusRcpStub(self.channel)
         except Exception as e:
             raise Exception('Connect to %s failed: %s'%(server_address,str(e)))
