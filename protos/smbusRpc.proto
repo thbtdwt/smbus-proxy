@@ -14,7 +14,7 @@ service SmbusRcp {
     rpc read_i2c_block_data (read_i2c_block_data_request)  returns (read_i2c_block_data_response) {}
     rpc write_i2c_block_data(write_i2c_block_data_request) returns (operation_status) {}
 
-    rpc ping                (keep_alive)                   returns (keep_alive) {}
+    rpc ping                (keep_alive)                   returns (operation_status) {}
 }
 
 // Operation status

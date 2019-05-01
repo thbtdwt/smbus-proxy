@@ -9,7 +9,6 @@ import time
 import datetime
 import hashlib
 import logging
-from logging.handlers import RotatingFileHandler
 
 
 class Client(object):
@@ -38,7 +37,6 @@ class BusContext(object):
         """
         self.i2c_bus = i2c_bus
         self.smbus = smbus
-        self.ref_count = 1  # count the number of clients who use this bus
 
 
 class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
@@ -87,7 +85,6 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
             del self.clients[i]
 
 
-
     def open(self, request, context):
         """
         Open i2c bus
@@ -103,7 +100,6 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         try:
             if i2c_bus in self.opened_busses:
                 self.clients[client_id] = Client(self.opened_busses[i2c_bus])
-                self.opened_busses[i2c_bus].ref_count += 1
             else:
                 self.opened_busses[i2c_bus] = BusContext(i2c_bus, self.smbus_cls(i2c_bus))
                 self.clients[client_id] = Client(self.opened_busses[i2c_bus])
@@ -151,12 +147,6 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
             bus_context = self.clients[client_id].bus_context
             self.logger.info('Client(%s) release bus %d' % (client_id, bus_context.i2c_bus))
             del self.clients[client_id]
-            bus_context.ref_count -= 1
-
-            if bus_context.ref_count == 0:
-                # This bus is no used anymore, close and remove it.
-                del self.opened_busses[bus_context.i2c_bus]
-            del bus_context
         except Exception as e:
             response.code = 1
             response.exception = 'proxy server: ' + str(e)
@@ -330,10 +320,15 @@ class SmbusRcpServicer(smbusRpc_pb2_grpc.SmbusRcpServicer):
         :param context: rpc context
         :return:
         """
-        client_id = self._get_client_id(context)
-        self.clients[client_id].update()
-        self.logger.debug('Ping from client(%s)' % client_id)
-        return smbusRpc_pb2.keep_alive(info='keep alive end')
+        status_response = smbusRpc_pb2.operation_status(code=0, exception='')
+        try:
+            client_id = self._get_client_id(context)
+            self.clients[client_id].update()
+            self.logger.debug('Ping from client(%s)' % client_id)
+        except Exception as e:
+            status_response.code = 1
+            status_response.exception = 'proxy server: ' + str(e)
+        return status_response
 
 
 class ProxyServer:

@@ -15,4 +15,4 @@ class LoopThread(Thread):
             time.sleep(self.period)
 
     def cancel(self):
-        self.self.running
+        self.running

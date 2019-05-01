@@ -67,7 +67,7 @@ class SmbusRcpStub(object):
     self.ping = channel.unary_unary(
         '/SmbusRcp/ping',
         request_serializer=smbusRpc__pb2.keep_alive.SerializeToString,
-        response_deserializer=smbusRpc__pb2.keep_alive.FromString,
+        response_deserializer=smbusRpc__pb2.operation_status.FromString,
         )
 
 
@@ -208,7 +208,7 @@ def add_SmbusRcpServicer_to_server(servicer, server):
       'ping': grpc.unary_unary_rpc_method_handler(
           servicer.ping,
           request_deserializer=smbusRpc__pb2.keep_alive.FromString,
-          response_serializer=smbusRpc__pb2.keep_alive.SerializeToString,
+          response_serializer=smbusRpc__pb2.operation_status.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
